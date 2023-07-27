@@ -1,0 +1,7 @@
+TABLE_SQLITE_CLIENTS = "clients.db"
+TABLE_SQLITE_DELIVERY = "deliverys.db"
+STORAGE_SQLITE_PATH = "src/infrastructure/config/"
+DELIVERY_QUEUE_NAME = "buy"
+HOST_MESSAGE_BROKER_USER = "localhost"
+STORAGE_TYPE = "mysql"
+MESSAGE_BROKER_TYPE = "rabbitmq"
