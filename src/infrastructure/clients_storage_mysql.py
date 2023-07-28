@@ -1,13 +1,13 @@
-from src.domain.interfaces.user_interface import UserStorage
-from src.domain.models.user_model import UserModel
+from src.domain.interfaces.client_interface import ClientStorage
+from src.domain.models.client_model import ClientModel
 from src.exceptions.custom_exceptions import NotFoundFail
 from src.infrastructure.config.config_storage import ConfigStorage
 from src.infrastructure.service.mysql import MySQL
 
 
-class UserStorageMySQL(MySQL, UserStorage):
+class ClientsStorageMySQL(MySQL, ClientStorage):
     def __init__(self):
-        super(UserStorageMySQL, self).__init__(ConfigStorage)
+        super(ClientsStorageMySQL, self).__init__(ConfigStorage)
         self.create_table()
 
     def create_table(self):
@@ -27,7 +27,7 @@ class UserStorageMySQL(MySQL, UserStorage):
         get_all_query = "SELECT * FROM clients"
 
         if clients := self.execute_query_many(get_all_query):
-            return [UserModel(*user) for user in clients]
+            return [ClientModel(*client) for client in clients]
         else:
             raise NotFoundFail('Client not found')
 
@@ -37,15 +37,15 @@ class UserStorageMySQL(MySQL, UserStorage):
         data_client = self.execute_query_one(get_by_id_query, get_by_id_params)
 
         if data_client and return_fields == "*":
-            return UserModel(*data_client)
+            return ClientModel(*data_client)
         elif data_client and return_fields != "*":
             return data_client
         else:
             raise NotFoundFail('Client not found')
 
-    def save(self, user: UserModel):
+    def save(self, client: ClientModel):
         save_query = "INSERT INTO clients (client_id, name, email, address) VALUES (%s, %s, %s, %s)"
-        save_params = (user.client_id, user.name, user.email, user.address)
+        save_params = (client.client_id, client.name, client.email, client.address)
 
         self.execute_query_one(save_query, save_params)
         self.commit()

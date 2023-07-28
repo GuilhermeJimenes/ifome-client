@@ -1,41 +1,41 @@
 from src.api.http.http_response import HttpResponse
 from src.domain.constants import STORAGE_TYPE
-from src.domain.core.user_core import GetAllUsersCore, GetUserByIdCore, CreateUserCore
-from src.domain.interfaces.user_interface import UserStorage
+from src.domain.core.client_core import GetAllClientsCore, GetClientByIdCore, CreateClientCore
+from src.domain.interfaces.client_interface import ClientStorage
 from src.exceptions.custom_exceptions import NotFoundFail, InvalidInputFail, RabbitMQError
-from src.infrastructure.user_storage_mysql import UserStorageMySQL
-from src.infrastructure.user_storage_sqlite import UserStorageSQLite
+from src.infrastructure.clients_storage_mysql import ClientsStorageMySQL
+from src.infrastructure.clients_storage_sqlite import ClientsStorageSQLite
 
 
-class UserApp:
+class ClientApp:
     def __init__(self):
         if STORAGE_TYPE == "mysql":
-            self.user_storage: UserStorage = UserStorageMySQL()
+            self.client_storage: ClientStorage = ClientsStorageMySQL()
         elif STORAGE_TYPE == "sqlite":
-            self.user_storage: UserStorage = UserStorageSQLite()
+            self.client_storage: ClientStorage = ClientsStorageSQLite()
         else:
             raise ValueError("Invalid storage, valid types: sqlite, mysql")
 
-    def get_all_users(self):
+    def get_all_clients(self):
         try:
-            user_use_cases = GetAllUsersCore(self.user_storage)
-            response = [user.__dict__ for user in user_use_cases.get_all_users()]
+            client_core = GetAllClientsCore(self.client_storage)
+            response = [client.__dict__ for client in client_core.get_all_clients()]
             return HttpResponse.success('Clients found successfully!', response)
         except NotFoundFail as error:
             return HttpResponse.failed(message=str(error))
 
-    def get_user_by_id(self, client_id):
+    def get_client_by_id(self, client_id):
         try:
-            user_use_cases = GetUserByIdCore(self.user_storage)
-            response = user_use_cases.get_user_by_id(client_id)
+            client_core = GetClientByIdCore(self.client_storage)
+            response = client_core.get_client_by_id(client_id)
             return HttpResponse.success('Client found successfully!', response.__dict__)
         except NotFoundFail as error:
             return HttpResponse.failed(message=str(error))
 
-    def create_user(self, name, email, address):
+    def create_client(self, name, email, address):
         try:
-            user_use_cases = CreateUserCore(self.user_storage)
-            response = user_use_cases.create_user(name, email, address)
+            client_core = CreateClientCore(self.client_storage)
+            response = client_core.create_client(name, email, address)
             return HttpResponse.success('Successfully registered client!', response.__dict__)
         except InvalidInputFail as error:
             return HttpResponse.failed(message=str(error))

@@ -1,4 +1,4 @@
-class BuyStorage:
+class DeliveriesStorage:
     def create_table(self):
         raise NotImplementedError()
 

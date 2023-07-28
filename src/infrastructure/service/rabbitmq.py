@@ -1,13 +1,13 @@
 import pika
 from pika.exceptions import AMQPConnectionError, AMQPError
 
-from src.domain.constants import HOST_MESSAGE_BROKER_USER
+from src.domain.constants import HOST_MESSAGE_BROKER
 from src.exceptions.custom_exceptions import RabbitMQError
 
 
 class RabbitMQ:
     def __init__(self):
-        self.host = HOST_MESSAGE_BROKER_USER
+        self.host = HOST_MESSAGE_BROKER
         self._connection, self._channel = self.connection(self.host)
         self.message = []
 
