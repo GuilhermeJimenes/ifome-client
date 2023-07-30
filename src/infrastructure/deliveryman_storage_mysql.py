@@ -7,6 +7,20 @@ from src.infrastructure.service.mysql import MySQL
 class DeliverymanStorageMySQL(MySQL, DeliverymanStorage):
     def __init__(self):
         super(DeliverymanStorageMySQL, self).__init__(ConfigStorage)
+        self.create_table()
+
+    def create_table(self):
+        create_table_query = (
+            "CREATE TABLE IF NOT EXISTS deliverymans ("
+            "deliveryman_id VARCHAR(36) PRIMARY KEY,"
+            "name VARCHAR(255) NOT NULL,"
+            "email VARCHAR(255) NOT NULL,"
+            "available BOOLEAN NOT NULL DEFAULT TRUE"
+            ")"
+        )
+
+        self.execute_query_one(create_table_query)
+        self.commit()
 
     def get_available(self):
         get_available_query = "SELECT deliveryman_id FROM deliverymans WHERE available = true ORDER BY RAND() LIMIT 1"
