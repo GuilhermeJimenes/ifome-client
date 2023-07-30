@@ -3,12 +3,15 @@ from src.domain.constants import STORAGE_TYPE, MESSAGE_BROKER_TYPE
 from src.domain.core.buy_core import CreateBuyCore, GetBuyById
 from src.domain.interfaces.deliveries_interface import BuyMessageBroker, DeliveriesStorage
 from src.domain.interfaces.client_interface import ClientStorage
+from src.domain.interfaces.deliveryman_interface import DeliverymanStorage
 from src.exceptions.custom_exceptions import RabbitMQError, NotFoundFail
 from src.infrastructure.buy_message_broker_rabbitmq import BuyMessageBrokerRabbitMQ
 from src.infrastructure.deliveries_storage_mysql import DeliveriesStorageMySQL
 from src.infrastructure.deliveries_storage_sqlite import DeliveriesStorageSQLite
 from src.infrastructure.clients_storage_mysql import ClientsStorageMySQL
 from src.infrastructure.clients_storage_sqlite import ClientsStorageSQLite
+from src.infrastructure.deliveryman_storage_mysql import DeliverymanStorageMySQL
+from src.infrastructure.deliveryman_storage_sqlite import DeliverymanStorageSQLite
 
 
 class BuyApp:
@@ -16,9 +19,11 @@ class BuyApp:
         if STORAGE_TYPE == "mysql":
             self.user_storage: ClientStorage = ClientsStorageMySQL()
             self.deliveries_storage: DeliveriesStorage = DeliveriesStorageMySQL()
+            self.deliveryman_storage: DeliverymanStorage = DeliverymanStorageMySQL()
         elif STORAGE_TYPE == "sqlite":
             self.user_storage: ClientStorage = ClientsStorageSQLite()
             self.deliveries_storage: DeliveriesStorage = DeliveriesStorageSQLite()
+            self.deliveryman_storage: DeliverymanStorage = DeliverymanStorageSQLite()
         else:
             raise ValueError("Invalid storage, valid types: sqlite, mysql")
 
@@ -37,8 +42,10 @@ class BuyApp:
 
     def create_buy(self, client_id, food_name):
         try:
-            buy_core = CreateBuyCore(self.user_storage, self.deliveries_storage, self.buy_message_broker)
+            buy_core = CreateBuyCore(self.user_storage, self.deliveries_storage, self.deliveryman_storage, self.buy_message_broker)
             response = buy_core.create_buy(client_id, food_name)
             return HttpResponse.success('Successfully registered buy!', response.__dict__)
+        except NotFoundFail as error:
+            return HttpResponse.failed(message=str(error))
         except RabbitMQError as error:
             return HttpResponse.internal_error(message=str(error))
