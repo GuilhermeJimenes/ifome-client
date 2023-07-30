@@ -31,8 +31,8 @@ class CreateBuyCore:
         return delivery
 
     def send_delivery(self, delivery_id):
-        self.buy_message_broker.send_buy(delivery_id)
-        self.buy_message_broker.connection_close()
+        self.buy_message_broker.publish_buy(delivery_id)
+        self.buy_message_broker.close_connection()
 
     def create_buy(self, client_id, food_name):
         delivery = self.new_delivery(client_id, food_name)
