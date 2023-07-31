@@ -1,14 +1,13 @@
-from src.domain.constants import STORAGE_SQLITE_PATH, TABLE_SQLITE_CLIENTS
-from src.domain.interfaces.user_interface import UserStorage
-from src.domain.models.user_model import UserModel
+from src.domain.constants import STORAGE_SQLITE_PATH
+from src.domain.interfaces.client_interface import ClientStorage
+from src.domain.models.client_model import ClientModel
 from src.exceptions.custom_exceptions import NotFoundFail
 from src.infrastructure.service.sqlite import SQLite
 
 
-class UserStorageSQLite(SQLite, UserStorage):
+class ClientsStorageSQLite(SQLite, ClientStorage):
     def __init__(self):
-        table_path = f"{STORAGE_SQLITE_PATH}{TABLE_SQLITE_CLIENTS}"
-        super(UserStorageSQLite, self).__init__(table_path)
+        super(ClientsStorageSQLite, self).__init__(STORAGE_SQLITE_PATH)
         self.create_table()
 
     def create_table(self):
@@ -27,7 +26,7 @@ class UserStorageSQLite(SQLite, UserStorage):
         get_all_query = "SELECT * FROM clients"
 
         if clients := self.execute_query_many(get_all_query):
-            return [UserModel(*user) for user in clients]
+            return [ClientModel(*user) for user in clients]
         else:
             raise NotFoundFail('Client not found')
 
@@ -37,13 +36,13 @@ class UserStorageSQLite(SQLite, UserStorage):
         data_client = self.execute_query_one(get_by_id_query, get_by_id_params)
 
         if data_client and return_fields == "*":
-            return UserModel(*data_client)
+            return ClientModel(*data_client)
         elif data_client and return_fields != "*":
             return data_client
         else:
             raise NotFoundFail('Client not found')
 
-    def save(self, user: UserModel):
+    def save(self, user: ClientModel):
         save_query = "INSERT INTO clients (client_id, name, email, address) VALUES (?, ?, ?, ?)"
         save_params = (user.client_id, user.name, user.email, user.address)
 

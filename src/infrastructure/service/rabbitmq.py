@@ -1,73 +1,79 @@
-import pika
-from pika.exceptions import AMQPConnectionError, AMQPError
+from time import sleep
 
-from src.domain.constants import HOST_MESSAGE_BROKER_USER
+import pika
+
+from src.domain.constants import HOST_MESSAGE_BROKER
 from src.exceptions.custom_exceptions import RabbitMQError
 
 
 class RabbitMQ:
     def __init__(self):
-        self.host = HOST_MESSAGE_BROKER_USER
-        self._connection, self._channel = self.connection(self.host)
-        self.message = []
+        self.host = HOST_MESSAGE_BROKER
+        self.connection, self.channel = self.connect()
+        self.method_frame = None
 
-    def connection(self, host):
+    def connect(self):
         try:
-            connection = pika.BlockingConnection(pika.ConnectionParameters(host))
+            connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
             channel = connection.channel()
             return connection, channel
-        except AMQPConnectionError as error:
+        except Exception as error:
             print(error)
-            raise RabbitMQError("Erro ao conectar ao RabbitMQ.") from error
+            raise RabbitMQError("Error connecting to RabbitMQ.") from error
 
-    def channel(self, connection):
-        try:
-            if not self._channel:
-                return connection.channel()
-        except AMQPConnectionError as error:
-            print(error)
-            raise RabbitMQError("Erro ao conectar ao RabbitMQ.") from error
+    def validate_connection(self):
+        if self.connection is None or self.channel is None:
+            raise RabbitMQError("Connection and channel must be configured before consuming")
 
     def new_queue(self, queue_name):
         try:
-            self._channel.queue_declare(queue=queue_name)
-        except AMQPError as error:
+            self.channel.queue_declare(queue=queue_name)
+        except Exception as error:
             print(error)
-            raise RabbitMQError("Erro ao criar a fila no RabbitMQ.") from error
+            raise RabbitMQError("Error creating queue in RabbitMQ.") from error
 
     def publish(self, queue_name, message):
         try:
-            self._channel.basic_publish(exchange='', routing_key=queue_name, body=message)
-            print("Mensagem enviada.")
-        except AMQPError as error:
-            print(error)
-            raise RabbitMQError("Erro ao publicar a mensagem no RabbitMQ.") from error
-
-    def callback_unitary(self, channel, method, properties, body):
-        message = body.decode('utf-8')
-        print(f"Mensagem recebida: {message}")
-        self.message.append(message)
-        self._channel.stop_consuming()
-
-    def callback_forever(self, channel, method, properties, body):
-        message = body.decode('utf-8')
-        print(f"Mensagem recebida: {message}")
-        self.message.append(message)
-
-    def consume(self, queue_name):
-        try:
-            self._channel.basic_consume(queue=queue_name, on_message_callback=self.callback_unitary, auto_ack=True)
-            print('Aguardando mensagens...')
-            self._channel.start_consuming()
-        except AMQPError as error:
-            print(error)
-            raise RabbitMQError("Erro ao consumir mensagens do RabbitMQ.") from error
-
-    def connection_close(self):
-        try:
-            if self._connection:
-                self._connection.close()
-                self._connection = None
+            self.channel.basic_publish(exchange='', routing_key=queue_name, body=message)
+            print("Published message.")
         except Exception as error:
             print(error)
-            raise RabbitMQError("Erro ao fechar conexao com RabbitMQ.") from error
+            raise RabbitMQError("Error publishing message to RabbitMQ.") from error
+
+    def consume_success(self):
+        """if not called, the message goes back to the queue"""
+        self.channel.basic_ack(delivery_tag=self.method_frame.delivery_tag)
+
+    def consumer(self, queue_name):
+        try:
+            while True:
+                sleep(2)
+                if not self.method_frame:
+                    self.method_frame, header_frame, body = self.channel.basic_get(queue=queue_name)
+                else:
+                    return body.decode()
+        except Exception as error:
+            print(error)
+            raise RabbitMQError("Error consuming message from RabbitMQ.")
+
+    def start_consuming(self, queue_name):
+        try:
+            self.validate_connection()
+            message_received = self.consumer(queue_name)
+            self.stop_consuming()
+            return message_received
+        except Exception as error:
+            print(error)
+            raise RabbitMQError("Error consuming message from RabbitMQ.")
+
+    def stop_consuming(self):
+        if self.channel is not None:
+            self.channel.stop_consuming()
+
+    def close_connection(self):
+        if self.channel is not None:
+            self.channel.stop_consuming()
+            self.channel = None
+        if self.connection is not None:
+            self.connection.close()
+            self.connection = None

@@ -2,17 +2,19 @@ from sqlite3 import connect
 
 
 class SQLite:
-    def __init__(self, table_path):
-        self.connection = connect(table_path)
+    def __init__(self, storege_path):
+        self.connection = connect(storege_path)
 
     def execute_query_one(self, query: str, params: tuple = ()):
-        with self.connection.cursor() as cursor:
+        with self.connection:
+            cursor = self.connection.cursor()
             cursor.execute(query, params)
             result = cursor.fetchone()
             return result
 
     def execute_query_many(self, query: str, params: tuple = ()):
-        with self.connection.cursor() as cursor:
+        with self.connection:
+            cursor = self.connection.cursor()
             cursor.execute(query, params)
             result = cursor.fetchall()
             return result

@@ -1,4 +1,4 @@
-class BuyStorage:
+class DeliveriesStorage:
     def create_table(self):
         raise NotImplementedError()
 
@@ -10,11 +10,12 @@ class BuyStorage:
 
 
 class BuyMessageBroker:
-    def send_buy(self, message):
+    def publish_buy(self, message):
         raise NotImplementedError()
 
-    def view_status(self):
+    def consume_success(self):
         raise NotImplementedError()
 
-    def connection_close(self):
+    def close_connection(self):
         raise NotImplementedError()
+

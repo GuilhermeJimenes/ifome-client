@@ -7,11 +7,13 @@ from src.presentation.payloads.buy import buy_ns, buy_payload
 
 class Buy(Resource):
     def get(self, _id):
+        """Lista dados da sua compra."""
         response = BuyApp().get_buy_by_id(_id)
         return response
 
     @buy_ns.expect(buy_payload, validate=True)
     def post(self, _id):
+        """Realiza uma solicitação de compra."""
         data = request.get_json()
 
         response = BuyApp().create_buy(_id, data['food_name'])

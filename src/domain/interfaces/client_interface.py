@@ -1,4 +1,4 @@
-class UserStorage:
+class ClientStorage:
     def create_table(self):
         raise NotImplementedError()
 
