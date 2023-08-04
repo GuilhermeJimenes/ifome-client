@@ -26,7 +26,7 @@ A seguir o link para download de todos os microsserviços e a documentação de 
 
 Antes de começa precisamos ter o [Python 3.8.10](https://www.python.org/downloads/release/python-3810/) instalado 
 e uma ide de sua preferência por exemplo o [Pycharm](https://www.jetbrains.com/pt-br/pycharm/) que é a ide recomenda 
-pelo python, também vamos também vamos precisar do [RabbitMQ](https://www.rabbitmq.com/) e do [MySQL](https://dev.mysql.com/doc/)
+pelo python, também vamos precisar do [RabbitMQ](https://www.rabbitmq.com/) e do [MySQL](https://dev.mysql.com/doc/)
 
 ### 🔧 Instalação
 
@@ -36,7 +36,7 @@ No terminal é preciso baixar as dependências com o seguinte comando:
 pip install - r requirements.txt
 ```
 
-Se estiver usando outra ide que não seja o pycharm vai preciso ativar a venv e interpretador manualmente antes de 
+Se estiver usando outra ide que não seja o pycharm vai ser preciso ativar a venv e interpretador manualmente antes de 
 rodar o comando a cima, consulte a documentação oficial do python se for o seu caso
 
 ## ⚙️ Começando
@@ -44,6 +44,9 @@ rodar o comando a cima, consulte a documentação oficial do python se for o seu
 * Antes de começar a utilizar esse projeto precisamos entender como ele funciona e é bem simples
 * Ao rodar o arquivo local.py você inicia o servidor flask, com isso todos os endpoints ficam disponíveis para serem 
 consumidos.
+* O passo anterior, além de iniciar o servidor, também fornece um Swagger, para facilitar os testes, além é claro de 
+ser uma ótima documentação, por padrão fica disponivel na url [http://127.0.0.1:5000](http://127.0.0.1:5000) 
+após iniciar o servidor
 * E ao rodar o arquivo index.py você inicia o consumer da fila, que é por onde ocorre a comunicação entre os 
 microsserviços do ifome
 
